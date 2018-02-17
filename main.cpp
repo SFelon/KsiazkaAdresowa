@@ -259,6 +259,7 @@ void eraseContact(vector <PersonData>& addressBook, int lastIdNumber) {
     int idToErase;
     char menuOperation = 0;
     int numberOfPersonFound = 0;
+    vector <PersonData> ::iterator it;
 
     if(lastIdNumber == 0) {
         cout<<"Ksiazka adresowa jest pusta!"<<endl;
@@ -268,7 +269,6 @@ void eraseContact(vector <PersonData>& addressBook, int lastIdNumber) {
         cout << "Podaj nr ID osoby, ktorej dane chcesz wykasowac: ";
         cin >> idToErase;
         cout << endl;
-        vector <PersonData> ::iterator it;
         for (it = addressBook.begin(); it != addressBook.end(); ++it) {
         if (it->idNumber == idToErase) {
                 cout << "ID: " << it->idNumber << endl;
@@ -308,7 +308,7 @@ void eraseContact(vector <PersonData>& addressBook, int lastIdNumber) {
                 idFromFile = atoi(dataToLoad.c_str());
                 if (idToErase != idFromFile)
                 temp << lineToLoad << endl;
-                addressBook.erase(addressBook.begin()+(idToErase-1));
+                addressBook.erase(addressBook.begin()+(it - addressBook.begin()));
             }
         plik.close();
         temp.close();
