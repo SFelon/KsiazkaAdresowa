@@ -143,63 +143,115 @@ void showContacts(vector <PersonData>& addressBook, int lastIdNumber) {
         exit(0);
 }
 
-void changeData(vector <PersonData>& addressBook, int numberOfContacts) {
+void changeData(vector <PersonData>& addressBook, int lastIdNumber) {
 char menuOperation = 0;
+int idToChange;
+int numberOfPersonFound = 0;
+string name, surname, email, telephoneNumber, address;
+
+    if(lastIdNumber==0) {
+        cout<<"Ksiazka adresowa jest pusta!"<<endl;
+        Sleep(1500);
+    } else {
     do {
-        string name, surname, email, telephoneNumber, address;
-        int idToChange;
-        int numberOfPersonFound = 0;
-        cout<<"Podaj nr ID osoby, ktorej dane chcesz zmienic: ";
-        cin>>idToChange; cin.clear(); cin.sync(); cout<<endl;
-
-        int idFromFile;
-        string lineToLoad = "";
-
-        ifstream plik;
-        ofstream temp;
-        plik.open("KsiazkaAdresowa.txt");
-        temp.open("temp.txt");
-
-        if(plik.good() == true) {
-        while(getline(plik, lineToLoad)) {
-            stringstream linestream(lineToLoad);
-            string dataToLoad;
-            cin.clear(); cin.sync();
-                getline(linestream, dataToLoad, '|');
-                idFromFile = atoi(dataToLoad.c_str());
-                if (idToChange != idFromFile)
-                temp << lineToLoad << endl;
-                else if (idToChange == idFromFile){
-                cout << "Podaj nowe dane: " << endl;
-                cout << "Podaj imie: "; cin>>name; cin.clear();  cin.sync();
-                cout << "Podaj nazwisko: "; cin>>surname; cin.clear(); cin.sync();
-                cout << "Podaj nr telefonu: "; cin>>telephoneNumber; cin.clear(); cin.sync();
-                cout << "Podaj email: "; cin>>email; cin.clear(); cin.sync();
-                cout << "Podaj adres: "; getline(cin,address); cin.clear(); cin.sync();
-                cout << endl;
-                temp << (addressBook[idToChange-1].idNumber = idToChange) << "|";
-                temp << (addressBook[idToChange-1].name = name) << "|";
-                temp << (addressBook[idToChange-1].surname = surname) << "|";
-                temp << (addressBook[idToChange-1].telephoneNumber = telephoneNumber) << "|";
-                temp << (addressBook[idToChange-1].email = email) << "|";
-                temp << (addressBook[idToChange-1].address = address) << "|" << endl;
+        cout << "Podaj nr ID osoby, ktorej dane chcesz zmienic: ";
+        cin >> idToChange;
+        cout << endl;
+        vector <PersonData> ::iterator it;
+        for (it = addressBook.begin(); it != addressBook.end(); ++it) {
+            if (it->idNumber == idToChange) {
                 numberOfPersonFound++;
+                cout << "ID: " << it->idNumber << endl;
+                cout << "Imie: " << it->name << endl;
+                cout << "Nazwisko: " << it->surname << endl;
+                cout << "Nr tel: " << it->telephoneNumber << endl;
+                cout << "Email: " << it->email << endl;
+                cout << "Adres: " << it->address << endl << endl;
+
+                name = addressBook[(it - addressBook.begin())].name;
+                surname = addressBook[(it - addressBook.begin())].surname;
+                telephoneNumber = addressBook[(it - addressBook.begin())].telephoneNumber;
+                email = addressBook[(it - addressBook.begin())].email;
+                address = addressBook[(it - addressBook.begin())].address;
+
+                cout << "Wybierz dane do edycji: " << endl;
+                cout<<"1. Imie"<<endl;
+                cout<<"2. Nazwisko"<<endl;
+                cout<<"3. Numer telefonu"<<endl;
+                cout<<"4. Email"<<endl;
+                cout<<"5. Adres"<<endl;
+                cout<<"6. Powrot do menu"<<endl;
+
+                char innerMenuOperation = 0;
+                cin >> innerMenuOperation; cin.clear(); cin.sync();
+
+                switch (innerMenuOperation) {
+                case '1':
+                    cout << "Podaj imie: "; cin>>name; cin.clear();  cin.sync(); cout<<endl;
+                    break;
+                case '2':
+                    cout << "Podaj nazwisko: "; cin>>surname; cin.clear(); cin.sync(); cout<<endl;
+                    break;
+                case '3':
+                    cout << "Podaj nr telefonu: "; cin>>telephoneNumber; cin.clear(); cin.sync(); cout<<endl;
+                    break;
+                case '4':
+                    cout << "Podaj email: "; cin>>email; cin.clear(); cin.sync(); cout<<endl;
+                    break;
+                case '5':
+                    cout << "Podaj adres: "; getline(cin,address); cin.clear(); cin.sync(); cout<<endl;
+                    break;
+                case '6':
+                    break;
                 }
-        }
-        plik.close();
-        temp.close();
-        remove("KsiazkaAdresowa.txt");
-        rename("temp.txt", "KsiazkaAdresowa.txt");
+
+                int idFromFile;
+                string lineToLoad = "";
+
+                ifstream plik;
+                ofstream temp;
+                plik.open("KsiazkaAdresowa.txt");
+                temp.open("temp.txt");
+
+                if(plik.good() == true) {
+                    while(getline(plik, lineToLoad)) {
+                        stringstream linestream(lineToLoad);
+                        string dataToLoad;
+                        cin.clear();
+                        cin.sync();
+                        getline(linestream, dataToLoad, '|');
+                        idFromFile = atoi(dataToLoad.c_str());
+                        if (idToChange != idFromFile)
+                            temp << lineToLoad << endl;
+                        else if (idToChange == idFromFile) {
+                            temp << (addressBook[(it - addressBook.begin())].idNumber = idToChange) << "|";
+                            temp << (addressBook[(it - addressBook.begin())].name = name) << "|";
+                            temp << (addressBook[(it - addressBook.begin())].surname = surname) << "|";
+                            temp << (addressBook[(it - addressBook.begin())].telephoneNumber = telephoneNumber) << "|";
+                            temp << (addressBook[(it - addressBook.begin())].email = email) << "|";
+                            temp << (addressBook[(it - addressBook.begin())].address = address) << "|" << endl;
+                        }
+                    }
+                    plik.close();
+                    temp.close();
+                    remove("KsiazkaAdresowa.txt");
+                    rename("temp.txt", "KsiazkaAdresowa.txt");
+                }
+               cout<<"Dane zostaly zmienione!" << endl;
+               Sleep(1000);
+               return;
+            }
         } if(numberOfPersonFound == 0) {
             cout<<"Nie odnaleziono kontaktu o wskazanym ID!"<<endl<<endl;
+            cout<<"1. Ponow polecenie" << endl;
+            cout<<"2. Powrot do menu glownego" << endl;
+            cout<<"3. Zakoncz program" << endl;
         }
-        cout<<"1. Ponow polecenie" << endl;
-        cout<<"2. Powrot do menu glownego" << endl;
-        cout<<"3. Zakoncz program" << endl;
         cin>>menuOperation; cin.clear(); cin.sync();
         if (menuOperation == '3')
             exit(0);
     }while(menuOperation == '1');
+}
 }
 
 
@@ -207,6 +259,11 @@ void eraseContact(vector <PersonData>& addressBook, int lastIdNumber) {
     int idToErase;
     char menuOperation = 0;
     int numberOfPersonFound = 0;
+
+    if(lastIdNumber == 0) {
+        cout<<"Ksiazka adresowa jest pusta!"<<endl;
+        Sleep(1500);
+    } else {
     do {
         cout << "Podaj nr ID osoby, ktorej dane chcesz wykasowac: ";
         cin >> idToErase;
@@ -223,12 +280,15 @@ void eraseContact(vector <PersonData>& addressBook, int lastIdNumber) {
                 numberOfPersonFound++;
                 break;
         }
-        } if (numberOfPersonFound == 0)
+        } if (numberOfPersonFound == 0) {
         cout << "Nie odnaleziono kontaktu o wskazanym ID!" << endl << endl;
+        Sleep(1000);
+        return;
+        }
     }while (numberOfPersonFound == 0);
 
     cout << "Czy na pewno chcesz wykasowac kontakt (t/n): ";
-    cin >> menuOperation;
+    cin >> menuOperation; cin.clear(); cin.sync();
 
     if (menuOperation == 't' || menuOperation == 'T') {
         int idFromFile;
@@ -254,10 +314,11 @@ void eraseContact(vector <PersonData>& addressBook, int lastIdNumber) {
         temp.close();
         remove("KsiazkaAdresowa.txt");
         rename("temp.txt", "KsiazkaAdresowa.txt");
-        cout<<"Usunieto kontakt"<<endl;
+        cout<<"Usunieto kontakt!"<<endl;
         Sleep(1000);
         }
     }
+}
 }
 
 
@@ -281,6 +342,7 @@ int main() {
         switch (menuOperation) {
         case '1':
             addNewContact(addressBook,loadAddressBook(addressBook));
+            system("cls");
             break;
         case '2':
             findContact(addressBook);
@@ -292,9 +354,11 @@ int main() {
             break;
         case '4':
             changeData(addressBook,loadAddressBook(addressBook));
+            system("cls");
             break;
         case '5':
             eraseContact(addressBook,loadAddressBook(addressBook));
+            system("cls");
             break;
         case '6':
             exit(0);
