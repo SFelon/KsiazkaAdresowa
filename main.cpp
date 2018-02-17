@@ -205,13 +205,32 @@ char menuOperation = 0;
 
 void eraseContact(vector <PersonData>& addressBook, int lastIdNumber) {
     int idToErase;
+    char menuOperation = 0;
+    int numberOfPersonFound = 0;
     do {
         cout << "Podaj nr ID osoby, ktorej dane chcesz wykasowac: ";
-        cin >> idToErase; cin.clear(); cin.sync(); cout << endl;
-        if (idToErase > lastIdNumber)
-        cout << "Nie odnaleziono kontaktu o wskazanym ID!" << endl;
-    }while (idToErase >  lastIdNumber);
+        cin >> idToErase;
+        cout << endl;
+        vector <PersonData> ::iterator it;
+        for (it = addressBook.begin(); it != addressBook.end(); ++it) {
+        if (it->idNumber == idToErase) {
+                cout << "ID: " << it->idNumber << endl;
+                cout << "Imie: " << it->name << endl;
+                cout << "Nazwisko: " << it->surname << endl;
+                cout << "Nr tel: " << it->telephoneNumber << endl;
+                cout << "Email: " << it->email << endl;
+                cout << "Adres: " << it->address << endl << endl;
+                numberOfPersonFound++;
+                break;
+        }
+        } if (numberOfPersonFound == 0)
+        cout << "Nie odnaleziono kontaktu o wskazanym ID!" << endl << endl;
+    }while (numberOfPersonFound == 0);
 
+    cout << "Czy na pewno chcesz wykasowac kontakt (t/n): ";
+    cin >> menuOperation;
+
+    if (menuOperation == 't' || menuOperation == 'T') {
         int idFromFile;
         string lineToLoad = "";
 
@@ -238,6 +257,7 @@ void eraseContact(vector <PersonData>& addressBook, int lastIdNumber) {
         cout<<"Usunieto kontakt"<<endl;
         Sleep(1000);
         }
+    }
 }
 
 
