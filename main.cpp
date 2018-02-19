@@ -171,13 +171,14 @@ struct PersonData {
     string address;
 };
 
-int loadAddressBook(vector <PersonData>& addressBook) {
+int loadAddressBook(vector <PersonData>& addressBook, int idLoggedUser) {
     addressBook.clear();
     PersonData personToLoad;
     int lastIdNumber = 0;
+    int userIdFromFile;
     string lineToLoad="";
     fstream plik;
-    plik.open("KsiazkaAdresowa.txt", ios::in);
+    plik.open("Adresaci.txt", ios::in);
 
     if(plik.good()==true) {
         while(getline(plik, lineToLoad)) {
@@ -185,19 +186,23 @@ int loadAddressBook(vector <PersonData>& addressBook) {
             string dataToLoad;
             cin.clear(); cin.sync();
                 getline(linestream, dataToLoad, '|');
-                personToLoad.idNumber = atoi(dataToLoad.c_str());
+                    personToLoad.idNumber = atoi(dataToLoad.c_str());
+                    lastIdNumber = personToLoad.idNumber;
                 getline(linestream, dataToLoad, '|');
-                personToLoad.name = dataToLoad;
-                getline(linestream, dataToLoad, '|');
-                personToLoad.surname = dataToLoad;
-                getline(linestream, dataToLoad, '|');
-                personToLoad.telephoneNumber = dataToLoad;
-                getline(linestream, dataToLoad, '|');
-                personToLoad.email = dataToLoad;
-                getline(linestream, dataToLoad, '|');
-                personToLoad.address = dataToLoad;
-                addressBook.push_back( personToLoad );
-                lastIdNumber = personToLoad.idNumber;
+                    userIdFromFile = atoi(dataToLoad.c_str());
+                if (userIdFromFile == idLoggedUser) {
+                    getline(linestream, dataToLoad, '|');
+                        personToLoad.name = dataToLoad;
+                    getline(linestream, dataToLoad, '|');
+                        personToLoad.surname = dataToLoad;
+                    getline(linestream, dataToLoad, '|');
+                        personToLoad.telephoneNumber = dataToLoad;
+                    getline(linestream, dataToLoad, '|');
+                        personToLoad.email = dataToLoad;
+                    getline(linestream, dataToLoad, '|');
+                        personToLoad.address = dataToLoad;
+                    addressBook.push_back( personToLoad );
+                }
                 }
         plik.close();
         return lastIdNumber;
@@ -205,7 +210,7 @@ int loadAddressBook(vector <PersonData>& addressBook) {
         return lastIdNumber;
 }
 
-void addNewContact(vector <PersonData>& addressBook, int lastIdNumber) {
+void addNewContact(vector <PersonData>& addressBook, int lastIdNumber, int idLoggedUser) {
 
     PersonData newPerson;
     string name, surname, email, telephoneNumber, address;
@@ -228,10 +233,11 @@ void addNewContact(vector <PersonData>& addressBook, int lastIdNumber) {
     cout<<"Podaj adres: "; getline(cin,address); cin.clear(); cin.sync();
 
     fstream plik;
-    plik.open("KsiazkaAdresowa.txt",ios::out | ios::app);
+    plik.open("Adresaci.txt",ios::out | ios::app);
 
     if(plik.good()==true) {
     plik<<(newPerson.idNumber = lastIdNumber+1)<<"|";
+    plik<< idLoggedUser <<"|";
     plik<<(newPerson.name = name)<<"|";
     plik<<(newPerson.surname = surname)<<"|";
     plik<<(newPerson.telephoneNumber = telephoneNumber)<<"|";
@@ -298,7 +304,7 @@ void showContacts(vector <PersonData>& addressBook, int lastIdNumber) {
         exit(0);
 }
 
-void changeData(vector <PersonData>& addressBook, int lastIdNumber) {
+void changeData(vector <PersonData>& addressBook, int lastIdNumber, int idLoggedUser) {
 char menuOperation = 0;
 int idToChange;
 int numberOfPersonFound = 0;
@@ -357,6 +363,7 @@ string name, surname, email, telephoneNumber, address;
                     cout << "Podaj adres: "; getline(cin,address); cin.clear(); cin.sync(); cout<<endl;
                     break;
                 case '6':
+                    return;
                     break;
                 }
 
@@ -365,7 +372,7 @@ string name, surname, email, telephoneNumber, address;
 
                 ifstream plik;
                 ofstream temp;
-                plik.open("KsiazkaAdresowa.txt");
+                plik.open("Adresaci.txt");
                 temp.open("temp.txt");
 
                 if(plik.good() == true) {
@@ -380,6 +387,7 @@ string name, surname, email, telephoneNumber, address;
                             temp << lineToLoad << endl;
                         else if (idToChange == idFromFile) {
                             temp << (addressBook[(it - addressBook.begin())].idNumber = idToChange) << "|";
+                            temp <<  idLoggedUser << "|";
                             temp << (addressBook[(it - addressBook.begin())].name = name) << "|";
                             temp << (addressBook[(it - addressBook.begin())].surname = surname) << "|";
                             temp << (addressBook[(it - addressBook.begin())].telephoneNumber = telephoneNumber) << "|";
@@ -389,8 +397,8 @@ string name, surname, email, telephoneNumber, address;
                     }
                     plik.close();
                     temp.close();
-                    remove("KsiazkaAdresowa.txt");
-                    rename("temp.txt", "KsiazkaAdresowa.txt");
+                    remove("Adresaci.txt");
+                    rename("temp.txt", "Adresaci.txt");
                 }
                cout<<"Dane zostaly zmienione!" << endl;
                Sleep(1000);
@@ -446,12 +454,12 @@ void eraseContact(vector <PersonData>& addressBook, int lastIdNumber) {
     cin >> menuOperation; cin.clear(); cin.sync();
 
     if (menuOperation == 't' || menuOperation == 'T') {
-        int idFromFile;
+        int idFromFile = 0;
         string lineToLoad = "";
 
         ifstream plik;
         ofstream temp;
-        plik.open("KsiazkaAdresowa.txt");
+        plik.open("Adresaci.txt");
         temp.open("temp.txt");
 
         if(plik.good() == true) {
@@ -463,12 +471,13 @@ void eraseContact(vector <PersonData>& addressBook, int lastIdNumber) {
                 idFromFile = atoi(dataToLoad.c_str());
                 if (idToErase != idFromFile)
                 temp << lineToLoad << endl;
-                addressBook.erase(addressBook.begin()+(it - addressBook.begin()));
             }
         plik.close();
         temp.close();
-        remove("KsiazkaAdresowa.txt");
-        rename("temp.txt", "KsiazkaAdresowa.txt");
+        remove("Adresaci.txt");
+        rename("temp.txt", "Adresaci.txt");
+
+        addressBook.erase(addressBook.begin()+(it - addressBook.begin()));
         cout<<"Usunieto kontakt!"<<endl;
         Sleep(1000);
         }
@@ -479,7 +488,7 @@ void eraseContact(vector <PersonData>& addressBook, int lastIdNumber) {
 
 int subMenu(vector <User>& users, int idLoggedUser) {
 vector <PersonData> addressBook;
-loadAddressBook(addressBook);
+loadAddressBook(addressBook,idLoggedUser);
 char menuOperation;
 
     while(1) {
@@ -498,7 +507,7 @@ char menuOperation;
         cin >> menuOperation;
         switch (menuOperation) {
         case '1':
-            addNewContact(addressBook,loadAddressBook(addressBook));
+            addNewContact(addressBook,loadAddressBook(addressBook, idLoggedUser), idLoggedUser);
             system("cls");
             break;
         case '2':
@@ -506,19 +515,20 @@ char menuOperation;
             system("cls");
             break;
         case '3':
-            showContacts(addressBook,loadAddressBook(addressBook));
+            showContacts(addressBook,loadAddressBook(addressBook, idLoggedUser));
             system("cls");
             break;
         case '4':
-            changeData(addressBook,loadAddressBook(addressBook));
+            changeData(addressBook,loadAddressBook(addressBook, idLoggedUser), idLoggedUser);
             system("cls");
             break;
         case '5':
-            eraseContact(addressBook,loadAddressBook(addressBook));
+            eraseContact(addressBook,loadAddressBook(addressBook, idLoggedUser));
             system("cls");
             break;
         case '6':
             changePassword(users, idLoggedUser);
+            system("cls");
             break;
         case '7':
             return 0;
