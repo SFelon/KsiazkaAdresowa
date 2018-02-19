@@ -7,16 +7,6 @@
 
 using namespace std;
 
-#include <iostream>
-#include <cstdlib>
-#include <windows.h>
-#include <fstream>
-#include <vector>
-#include <sstream>
-
-
-using namespace std;
-
 struct User
 {
     int id;
