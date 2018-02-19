@@ -551,9 +551,10 @@ int main() {
             system("cls");
             break;
         case '2': {
-            do {
-                idLoggedUser = subMenu(users, loginUser(users));
-            } while (idLoggedUser != 0);
+            idLoggedUser = loginUser(users);
+            while (idLoggedUser != 0) {
+                idLoggedUser = subMenu(users, idLoggedUser);
+            }
             system("cls");
             break;
         } case '9':
