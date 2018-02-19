@@ -7,6 +7,161 @@
 
 using namespace std;
 
+#include <iostream>
+#include <cstdlib>
+#include <windows.h>
+#include <fstream>
+#include <vector>
+#include <sstream>
+
+
+using namespace std;
+
+struct User
+{
+    int id;
+    string login;
+    string password;
+};
+
+int loadUserData(vector <User>& users) {
+    users.clear();
+    User userToLoad;
+    int lastUserIdNumber = 0;
+    string lineToLoad="";
+    fstream plik;
+    plik.open("Uzytkownicy.txt", ios::in);
+
+    if(plik.good()==true) {
+        while(getline(plik, lineToLoad)) {
+            stringstream linestream(lineToLoad);
+            string dataToLoad;
+            cin.clear(); cin.sync();
+                getline(linestream, dataToLoad, '|');
+                userToLoad.id = atoi(dataToLoad.c_str());
+                getline(linestream, dataToLoad, '|');
+                userToLoad.login = dataToLoad;
+                getline(linestream, dataToLoad, '|');
+                userToLoad.password = dataToLoad;
+                users.push_back( userToLoad );
+                lastUserIdNumber = userToLoad.id;
+                }
+        plik.close();
+        return lastUserIdNumber;
+    } else
+        return lastUserIdNumber;
+}
+
+
+void registerNewUser(vector <User>& users, int lastIdNumber) {
+User newUser;
+string login, password;
+cout << "Podaj nowy login uzytkownika: ";
+cin >> login;
+
+vector <User> ::iterator it;
+    for (it = users.begin(); it != users.end(); it++) {
+        if (it->login == login) {
+            cout << "Podany login jest juz wykorzystany. Wybierz inny: ";
+            cin >> login;
+        }
+    }
+    cout << "Podaj haslo: ";
+    cin >> password;
+
+    fstream plik;
+    plik.open("Uzytkownicy.txt",ios::out | ios::app);
+
+       if(plik.good()==true) {
+       plik<<( newUser.id = lastIdNumber+1 ) << "|";
+       plik<<( newUser.login = login ) << "|";
+       plik<<( newUser.password = password ) << "|" << endl;
+       plik.close();
+       users.push_back(newUser);
+       cout<<"Konto zalozone"<<endl;
+       Sleep(1000);
+       } else {
+        cout << "Nie udalo sie otworzyc pliku i zapisac do niego danych.";
+        system("pause");
+       }
+ }
+
+int loginUser(vector <User>& users) {
+    string login, password;
+    cout << "Podaj login: ";
+    cin >> login;
+    vector <User> ::iterator it;
+    for (it = users.begin(); it != users.end(); it++) {
+        if (it->login == login) {
+            for(int j=0; j<3; j++) {
+                cout<<"Podaj haslo. Pozostalo prob: "<<3-j<<endl;
+                cin >> password;
+                if ( users[(it - users.begin())].password == password ) {
+                    cout<<"Zalogowales sie."<<endl;
+                    Sleep(1000);
+                    return users[(it - users.begin())].id;
+                }
+            }
+            cout<<"Podales 3 razy bledne haslo. Poczekaj";
+            Sleep(3000);
+            return 0;
+        }
+    }
+    cout<<"Uzytkownik o podanym loginie nie istnieje"<<endl;
+    Sleep(1500);
+    return 0;
+}
+
+void changePassword(vector <User>& users, int idLoggedUser) {
+    int id;
+    string login, password;
+    cout<<"Podaj nowe haslo: ";
+    cin >> password;
+    vector <User> ::iterator it;
+    for (it = users.begin(); it != users.end(); it++) {
+        if (it->id == idLoggedUser) {
+
+            id = users[(it - users.begin())].id;
+            login = users[(it - users.begin())].login;
+
+            int idFromFile;
+            string lineToLoad = "";
+
+            ifstream plik;
+            ofstream temporary;
+            plik.open("Uzytkownicy.txt");
+            temporary.open("temporary.txt");
+
+            if(plik.good() == true) {
+                while(getline(plik, lineToLoad)) {
+                    stringstream linestream(lineToLoad);
+                    string dataToLoad;
+                    cin.clear();
+                    cin.sync();
+                    getline(linestream, dataToLoad, '|');
+                    idFromFile = atoi(dataToLoad.c_str());
+                    if (idLoggedUser != idFromFile)
+                        temporary << lineToLoad << endl;
+                    else if (idLoggedUser == idFromFile) {
+                        temporary << (users[(it - users.begin())].id = id) << "|";
+                        temporary << (users[(it - users.begin())].login = login) << "|";
+                        temporary << (users[(it - users.begin())].password = password) << "|" << endl;
+                    }
+                }
+                plik.close();
+                temporary.close();
+                remove("Uzytkownicy.txt");
+                rename("temporary.txt", "Uzytkownicy.txt");
+                cout<<"Haslo zostalo zmienione";
+                Sleep(1000);
+            } else {
+                cout << "Nie udalo sie otworzyc pliku i zapisac do niego danych.";
+                system("pause");
+            }
+        }
+    }
+}
+
 struct PersonData {
     int idNumber;
     string name;
@@ -322,10 +477,10 @@ void eraseContact(vector <PersonData>& addressBook, int lastIdNumber) {
 }
 
 
-int main() {
-    vector <PersonData> addressBook;
-    loadAddressBook(addressBook);
-    char menuOperation;
+int subMenu(vector <User>& users, int idLoggedUser) {
+vector <PersonData> addressBook;
+loadAddressBook(addressBook);
+char menuOperation;
 
     while(1) {
         system("cls");
@@ -337,7 +492,9 @@ int main() {
         cout<<"3. Wyswietl kontakty"<<endl;
         cout<<"4. Zmien dane kontaktu"<<endl;
         cout<<"5. Usun kontakt"<<endl;
-        cout<<"6. Zakoncz program"<<endl;
+        cout<<"6. Zmien haslo"<<endl;
+        cout<<"7. Wyloguj"<<endl;
+        cout<<"8. Zakoncz program"<<endl;
         cin >> menuOperation;
         switch (menuOperation) {
         case '1':
@@ -361,6 +518,45 @@ int main() {
             system("cls");
             break;
         case '6':
+            changePassword(users, idLoggedUser);
+            break;
+        case '7':
+            return 0;
+            break;
+        case '8':
+            exit(0);
+        }
+    }
+}
+
+int main() {
+    vector <User> users;
+    loadUserData(users);
+    int idLoggedUser = 0;
+    int numberOfUsers = 0;
+    char mainMenuOperation;
+
+    while(1) {
+        system("cls");
+        cout<<"------------------"<<endl;
+        cout<<" KSIAZKA ADRESOWA:"<<endl;
+        cout<<"------------------"<<endl;
+        cout<<"1. Rejestracja"<<endl;
+        cout<<"2. Logowanie"<<endl;
+        cout<<"9. Zakoncz Program"<<endl;
+        cin >> mainMenuOperation;
+        switch(mainMenuOperation) {
+        case '1':
+            registerNewUser(users, loadUserData(users));
+            system("cls");
+            break;
+        case '2': {
+            do {
+                idLoggedUser = subMenu(users, loginUser(users));
+            } while (idLoggedUser != 0);
+            system("cls");
+            break;
+        } case '9':
             exit(0);
             break;
         }
